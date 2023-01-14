@@ -55,17 +55,15 @@ public:
 
 class WordFilter {
 private:
-	int longest_idx;
-	int max_len;
+	int res;
 	int pref_len;
 	int suff_len;
 	Trie* trie;
 public:
     WordFilter(vector<string>& words) {
-		longest_idx = -1;
+		res = -1;
 		pref_len = -1;
 		suff_len = -1;
-		max_len = -1; // len is -1 if no word is found
        	// Build trie 
 		trie = new Trie();
 		for (int i = 0; i < words.size(); i++)
@@ -81,7 +79,7 @@ public:
 		suff_len = suff.size();
 		// Starting from the address of the prefix end, record the max lengths of words that end with the suffix
 		searchSuff(pref_end, suff);
-       	return longest_idx; 
+       	return res; 
     }
 	// searches for the suffix from the prefix end 
 	void searchSuff(Node* node, string suff, int mid_len = 0){
@@ -91,12 +89,12 @@ public:
 			int word_len = (pref_len + mid_len + suff_len);
 			// cout << word_len << " " << suff_len << endl;
 			// cout << res << endl;
-			if ((word_len > max_len) && res != -1){
-				cout << pref_len << " " << mid_len << " " << suff_len << endl;
-				cout << "setting max len to " << word_len << endl;
-				longest_idx = res;
-				max_len = word_len;
-			}
+			// if ((word_len > max_len) && res != -1){
+			// 	cout << pref_len << " " << mid_len << " " << suff_len << endl;
+			// 	cout << "setting max len to " << word_len << endl;
+			// 	res = res;
+			// 	max_len = word_len;
+			// }
 		}
 
 		for (int i = 0; i < NUM_ALPHA; i++){
@@ -111,6 +109,8 @@ public:
 		int ch_idx = suff[0] - 'a';	
 		if (node->is_end){
 			cout << "found word index: " << node->word_index << endl;
+			if (res < node->word_index)
+				res = node->word_index;
 			return node->word_index;	
 		}
 		if (node->children[ch_idx]){
@@ -141,7 +141,8 @@ public:
  */
 
 int main(){
-	vector<string> words = { "abbba", "abba" };
+	// vector<string> words = { "abbba", "abba" };
+	vector<string> words = {"c","c","c","i","c","c","c","c","c","i","c","c","c","c","c","i","c","i","c","c","c","c","c","c","c","i","c","c","c","c","c","c","c","c","c","c","c","c","c","c","c","c","c","c","c","c","c","c","c","c","i","c","c","c","c","c","c","c","c","c","c","c","c","c"};
 	WordFilter sol(words);
-	cout << sol.f("ab", "ba");
+	cout << sol.f("c","c");
 }
