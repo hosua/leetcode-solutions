@@ -9,4 +9,5 @@ ext="${filename##*.}"
 filename="${filename%.*}"
 
 echo "Compiled $filename.cc -> $filename.out"
-g++ "$src" -o "$filename.out" && ./$filename.out
+echo "Running $filename.out"
+g++ "$src" -g -o "$filename.out" && ./$filename.out
