@@ -1,0 +1,45 @@
+use std::collections::HashMap;
+
+pub struct Solution;
+
+
+// Meh, not working.
+
+// return false if prev not previous to next
+fn compare_words(next: &String, prev: &String, mp: &HashMap<char, usize>) -> bool {
+    let mut i = 0;
+    while next.chars().nth(i) == prev.chars().nth(i) 
+        && i < next.len() && i < prev.len() {
+        i += 1;
+    }
+
+    let av = &prev.chars().nth(i);
+    if *av == None { return true; } // a < b
+
+    let bv = &next.chars().nth(i);
+    if *bv == None { return false; } //  b < a
+
+    let b = *mp.get(&next.chars().nth(i).unwrap()).unwrap();
+    let a = *mp.get(&prev.chars().nth(i).unwrap()).unwrap();
+    return if a < b { true } else { false };
+}
+
+impl Solution {
+    pub fn is_alien_sorted(words: Vec<String>, order: String) -> bool {
+        let mut mp: HashMap<char, usize> = HashMap::new();
+        for (i, ch) in order.chars().enumerate(){
+            mp.insert(ch, i);
+        }
+
+        let mut prev = &words[0];
+
+        for i in 1..words.len() {
+            let word = &words[i];
+            if (!compare_words(word, prev, &mp)){
+                return false;
+            }
+            prev = word;
+        }
+        return true;
+    }
+}

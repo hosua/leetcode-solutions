@@ -1,0 +1,4 @@
+mod permutations;
+
+fn main() {
+}
