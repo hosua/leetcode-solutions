@@ -1,0 +1,135 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+
+// TODO: I suck ass
+class Solution {
+private:
+	int V, Q;
+	vector<vector<int>> adj;
+	vector<set<int>> ancestors;
+	vector<int> outdegree;
+	vector<int> indegree;
+
+	vector<set<int>> partitions;
+
+public:
+    vector<bool> checkIfPrerequisite(int num_courses, vector<vector<int>>& prerequisites, vector<vector<int>>& queries) {
+       	V = num_courses; 
+		Q = queries.size();
+		adj = vector<vector<int>>(V);
+		ancestors = vector<set<int>>(V);
+		indegree = vector<int>(V, 0);
+		outdegree = vector<int>(V, 0);
+
+		for (vector<int> edge : prerequisites){
+			int src = edge[0], dest = edge[1];
+			adj[src].push_back(dest);
+			outdegree[src]++;
+			indegree[dest]++;
+		}
+
+		findPartitions();
+
+		printPartitions();
+
+		queue<int> q;
+		for (int course = 0; course < num_courses; course++)
+			if (indegree[course] == 0)
+				q.push(course);
+		while (!q.empty()){
+			size_t breadth = q.size();
+			while (breadth--){
+				int prereq = q.front(); q.pop();
+				for (int course : adj[prereq]){
+					if (--indegree[course] == 0){
+						q.push(course);
+						ancestors[course].insert(prereq);
+						for (int anc : ancestors[prereq])
+							ancestors[course].insert(anc);
+					}
+				}
+			}
+		}	
+
+		printAncestors();
+
+		vector<bool> res(Q, false);
+		for (int i = 0; i < queries.size(); i++){
+			vector<int> query = queries[i];
+			int prereq = query[0], course = query[1];
+			if ((ancestors[prereq].find(course) == ancestors[prereq].end()) 
+					&& inSamePartition(course,prereq))
+				res[i] = true;
+			else 
+				res[i] = false;
+		}
+
+		return res;
+    }
+private:
+
+	bool inSamePartition(int a, int b){
+		for (set<int> part : partitions){
+			if (part.find(a) != part.end() && part.find(b) != part.end())
+				return true;
+		}
+		return false;
+	}
+
+	void findPartitions(){
+		vector<bool> visited(V, false);
+		int part = 0;
+
+		function <void(int)> findPartitionsUtil;
+		findPartitionsUtil = [&](int node) -> void {
+			visited[node] = true;	
+			partitions[part].insert(node);
+			for (int neighbor : adj[node]){
+				if (!visited[neighbor])
+					findPartitionsUtil(neighbor);
+			}
+		};
+
+		for (int node = 0; node < V; node++){
+			if (indegree[node] == 0 && !visited[node]){
+				partitions.resize(part+1);
+				findPartitionsUtil(node);
+				part++;
+			}
+		}
+	}
+
+	void printPartitions(){
+		cout << "PARTITIONS\n";
+		for (set<int> part : partitions){
+			cout << "[";
+			for (int num : part)
+				cout << num << " ";
+			cout << "]\n";
+		}
+	}
+
+	void printAncestors(){
+		cout << "ANCESTORS\n";
+		for (int node = 0; node < V; node++){
+			cout << node << ": [";
+			for (int ancestor : ancestors[node])
+				cout << ancestor << " ";
+			cout << "]\n";
+		}
+	}
+};
+int main(){
+    Solution sol;
+	// int num_courses = 2;
+	// vector<vector<int>> prereq = {{1,0}}, queries = {{0,1},{1,0}}; // 0 1
+	int num_courses = 3;
+	vector<vector<int>> prereq = {{1,2},{1,0},{2,0}}, queries = {{1,0},{1,2}}; // 1 1
+	// int num_courses = 2; 
+	// vector<vector<int>> prereq = {}, queries = {{1,0},{0,1}}; // 0 0
+	vector<bool> res = sol.checkIfPrerequisite(num_courses, prereq, queries);
+	for (bool r : res)
+		cout << r << " ";
+	cout << "\n";
+}
